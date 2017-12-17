@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Add symbolic link to path
+sudo ln -fs "$(pwd)/git-greenbase" /usr/local/bin/git-greenbase
+
