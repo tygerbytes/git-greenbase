@@ -1,0 +1,4 @@
+#!/bin/bash
+
+git rev-parse origin/master
+

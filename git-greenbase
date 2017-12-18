@@ -1,3 +1,73 @@
 #!/bin/bash
 
-echo what what!
+# Uncomment for debugging mode
+# set -x
+
+# Get true path/dir to script
+scriptpath="$(readlink -f "$0")"
+scriptdir="${scriptpath%/*}"
+
+# Make sure we are in a Git repo
+[[ ! -e .git ]] && { echo "Not a git repo"; exit 1; } >&2
+
+# Make sure we can run Git commands
+if ! type git > /dev/null 2>&1; then
+    echo "Cannot run git. Is it in your PATH?" >&2
+fi
+
+get_green_hash() {
+    provider=$(git config greenbase.provider)
+    if [[ -z $provider ]]; then
+        echo "Set a CI provider with git config greenbase.provider <PROVIDER>" >&2 
+        exit 1
+    fi
+    # Use the configured CI provider to get the hash for the latest passing build
+    hash="$(${scriptdir}/ci-providers/${provider})"
+    echo $hash
+}
+
+rebase_after_pull() {
+    [[ $(git config branch.autosetuprebase) -eq always ]] \
+      || [[ $(git config pull.rebase) -eq true ]]
+}
+
+upstream_branch() {
+    git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)
+}
+
+# Fetch the latest
+branch=$(git rev-parse --abbrev-ref HEAD)
+
+if [[ $branch -ne master ]]; then
+    git fetch origin master:master > /dev/null 2>&1
+else
+    git fetch > /dev/null 2>&1
+fi
+
+greenhash=$(get_green_hash)
+if [[ -z $greenhash ]]; then
+    echo "Unable to retrieve latest green build." >&2
+    exit 1
+fi
+
+if [[ $greenhash == $(git rev-parse master) ]]; then
+    echo 'Already on the latest green build. Tidying up.'
+fi
+
+echo "Latest green build: $(git log -1 --oneline $greenhash)"
+
+echo -n "Resetting master to match "
+# Update origin/master to match greenhash
+git update-ref refs/remotes/origin/master $greenhash
+
+if [[ $branch == master ]]; then
+    git reset --hard $greenhash
+else
+    # Update master to match greenhash
+    git update-ref refs/heads/master $greenhash
+    if rebase_after_pull && [[ ! -z upstream_branch ]]; then
+        echo "and rebasing ${branch} onto master"
+        git pull --rebase > /dev/null 2>&1
+    fi
+fi
+
