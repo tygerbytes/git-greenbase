@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# Uncomment to debug
+set -x
+
+get_config() {
+    [[ $# -ne 1 ]] && { echo "get_config: no option specified" >&2; exit 1; }
+    key=$1
+
+    # Check environment variable
+    upcase_key=$( echo $key | tr '/a-z/' '/A-Z/' )
+    env_var="GREENBASE_GITLAB_$upcase_key"
+    value="${!env_var}"
+    if [[ ! -z $value ]]; then
+        echo $value
+        return 0
+    fi
+    
+    # Check git config
+    value=$(git config "greenbase.gitlab.$key")
+    if [[ ! -z $value ]]; then
+        echo $value
+        return 0
+    fi
+
+    echo "get_config: \'$key\' not set as environment variable or git config" >&2
+    exit 1
+}
+
+apiVersion=v4
+branch=master
+token=$(get_config "token")
+projectId=$(get_config "projectId")
+serverUri=$(get_config "serverUri")
+
+# Make sure curl exists
+if ! type curl > /dev/null 2>&1; then
+    echo "curl is not installed." >&2
+    exit 1
+fi
+
+request_gl_project_response() {
+    [[ $# -ne 1 ]] && { echo "Missing relative uri for querying Gitlab" >&2; exit 1; }
+    relativeUri=$1
+    curl --header "PRIVATE-TOKEN: ${token}" "${serverUri}/api/${apiVersion}/projects/${projectId}/${relativeUri}"
+
+}
+
+request_gl_project_response "/pipelines?status=success&scope=finished&ref=${branch}"
+
