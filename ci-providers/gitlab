@@ -3,6 +3,10 @@
 # Uncomment to debug
 set -x
 
+# Get true path/dir to script
+scriptpath="$(readlink -f "$0")"
+scriptdir="${scriptpath%/*}"
+
 get_config() {
     [[ $# -ne 1 ]] && { echo "get_config: no option specified" >&2; exit 1; }
     key=$1
@@ -39,6 +43,15 @@ if ! type curl > /dev/null 2>&1; then
     exit 1
 fi
 
+# Use 32 or 64 bit jq?
+arch=$(uname -i)
+jq="$scriptdir/../jq/jq"
+if [[ $arch =~ 'x86_64' ]]; then
+    jq="${jq}64"
+else
+    jq="${jq}32"
+fi
+
 request_gl_project_response() {
     [[ $# -ne 1 ]] && { echo "Missing relative uri for querying Gitlab" >&2; exit 1; }
     relativeUri=$1
@@ -46,5 +59,11 @@ request_gl_project_response() {
 
 }
 
-request_gl_project_response "/pipelines?status=success&scope=finished&ref=${branch}"
+response=$(request_gl_project_response "/pipelines?status=success&scope=finished&ref=${branch}")
+if [[ -z $response ]]; then
+    echo "Error querying gitlab" >&2;
+    exit 1
+fi
+
+echo $response | $jq
 
