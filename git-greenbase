@@ -50,21 +50,16 @@ if [[ -z $greenhash ]]; then
     exit 1
 fi
 
-if [[ $greenhash == $(git rev-parse master) ]]; then
-    echo 'Already on the latest green build. Tidying up.'
-fi
-
 if ! git cat-file -e $greenhash; then
     echo "${greenhash} not found in local repository. Check your configs." >&2
     exit 1
 fi
 
+if [[ $greenhash == $(git rev-parse master) ]]; then
+    echo 'Already on the latest green build. Tidying up.'
+fi
+
 echo "Latest green build: $(git log -1 --oneline $greenhash)"
-
-
-
-exit 
-
 
 echo -n "Resetting master to match "
 # Update origin/master to match greenhash
