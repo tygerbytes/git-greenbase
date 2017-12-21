@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Uncomment to debug
-set -x
+# set -x
 
 # Get true path/dir to script
 scriptpath="$(readlink -f "$0")"
@@ -65,5 +65,11 @@ if [[ -z $response ]]; then
     exit 1
 fi
 
-echo $response | $jq
+hash=$(echo $response | $jq --raw-output '.[0].sha')
+if [[ $hash == null ]]; then
+    echo "Error parsing results" >&2;
+    exit 1
+fi
+
+echo $hash
 
