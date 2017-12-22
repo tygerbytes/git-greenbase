@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# Uncomment for debugging mode
-# set -x
+if [[ ${GREENBASE_DEBUG-false} != false ]]; then
+    set -x
+fi
 
 # Get true path/dir to script
 scriptpath="$(readlink -f "$0")"
