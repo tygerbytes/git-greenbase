@@ -4,23 +4,14 @@ if [[ ${GREENBASE_DEBUG-false} != false ]]; then
     set -x
 fi
 
-# Get true path/dir to script
+# Get real path to script
 scriptpath="$(readlink -f "$0")"
 scriptdir="${scriptpath%/*}"
 
 get_config() {
-    [[ $# -ne 1 ]] && { echo "get_config: no option specified" >&2; exit 1; }
+    [[ $# -ne 1 ]] && { echo "git config greenbase.???: No option specified." >&2; exit 1; }
     key=$1
 
-    # Check environment variable
-    upcase_key=$( echo $key | tr '/a-z/' '/A-Z/' )
-    env_var="GREENBASE_GITLAB_$upcase_key"
-    value="${!env_var}"
-    if [[ ! -z $value ]]; then
-        echo $value
-        return 0
-    fi
-    
     # Check git config
     value=$(git config "greenbase.gitlab.$key")
     if [[ ! -z $value ]]; then
@@ -28,7 +19,7 @@ get_config() {
         return 0
     fi
 
-    echo "get_config: \'$key\' not set as environment variable or git config" >&2
+    echo "git config greenbase.\'$key\' is not configured." >&4
     exit 1
 }
 
