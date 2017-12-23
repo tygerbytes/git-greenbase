@@ -4,9 +4,13 @@ if [[ ${GREENBASE_DEBUG-false} != false ]]; then
     set -x
 fi
 
+# -- Check dependencies and export vars
+# /
+#
+
 # Get true path/dir to script
 scriptpath="$(readlink -f "$0")"
-scriptdir="${scriptpath%/*}"
+declare -x scriptdir="${scriptpath%/*}"
 
 # Make sure we are in a Git repo
 [[ ! -e .git ]] && { echo "Not a git repo"; exit 1; } >&2
@@ -14,15 +18,129 @@ scriptdir="${scriptpath%/*}"
 # Make sure we can run Git commands
 if ! type git > /dev/null 2>&1; then
     echo "Cannot run git. Is it in your PATH?" >&2
+    exit 1
 fi
 
-get_green_hash() {
-    provider=$(git config greenbase.provider)
-    if [[ -z $provider ]]; then
-        echo "Set a CI provider with git config greenbase.provider <PROVIDER>" >&2 
-        exit 1
+# Make sure curl exists
+if ! type curl > /dev/null 2>&1; then
+    echo "curl is not installed." >&2
+    exit 1
+fi
+declare -x curl=$(which curl)
+
+# Use 32 or 64 bit jq?
+arch=$(uname -i)
+jq="$scriptdir/jq/jq"
+if [[ $arch =~ 'x86_64' ]]; then
+    jq="${jq}64"
+else
+    jq="${jq}32"
+fi
+export jq
+
+declare -x branch=master
+declare -x dry_run=false
+
+get_config() {
+    [[ $# -ne 1 ]] && { echo "git config greenbase.???: No option specified." >&2; exit 1; }
+    key=$1
+
+    # Check git config
+    value=$(git config "greenbase.${key}")
+    if [[ ! -z $value ]]; then
+        echo $value
+        return 0
     fi
-    # Use the configured CI provider to get the hash for the latest passing build
+
+    echo "git config: \'greenbase.${key}\' is not configured." >&2
+    exit 1
+}
+export -f get_config
+
+
+# -- Parse options && Display help
+# /
+#
+
+print_help() {
+    cat >&2 <<END
+usage: git greenbase [<options>] branch
+    -p <provider> Use specific CI <provider>
+    -b <branch>   Specify <branch> other than master
+    -d            (Dry Run) Don't do anything destructive
+
+END
+}
+
+while getopts "b:dp:" opt; do
+    case $opt in
+        p)
+            provider_override="${OPTARG}"
+            ;;
+        b)
+            branch="${OPTARG}"
+            ;;
+        d)
+            dry_run=true
+            ;;
+        \?)
+            print_help
+            exit 1
+            ;;
+    esac
+done
+
+
+# -- Set provider
+# /
+#
+
+provider_exists() {
+    # TODO
+    return 0
+}
+
+print_providers() {
+    # TODO
+    echo TODO
+}
+
+declare -x provider
+
+if [[ ! -z $provider_override ]]; then
+    provider=$provider_override
+else
+    provider=$(get_config "provider") > /dev/null 2>&1
+fi
+
+if [[ -z $provider ]]; then
+    cat >&2 <<END
+
+    CI provider not set.
+    Configure with:
+    
+        git config greenbase.provider <provider>
+
+    Or:
+
+        git greenbase -p <provider>
+
+END
+    exit 1
+fi
+
+if ! provider_exists $provider; then
+    echo "Provider \'${provider}\' not supported." >&2
+    print_providers
+    exit 1
+fi
+
+
+# -- Main script
+# /
+#
+
+get_green_hash() {
     hash="$(${scriptdir}/ci-providers/${provider})"
     echo $hash
 }
@@ -67,13 +185,13 @@ echo -n "Resetting master to match "
 git update-ref refs/remotes/origin/master $greenhash
 
 if [[ $branch == master ]]; then
-    git reset --hard $greenhash
+    [[ $dry_run == false ]] && git reset --hard $greenhash
 else
     # Update master to match greenhash
     git update-ref refs/heads/master $greenhash
     if rebase_after_pull && [[ ! -z upstream_branch ]]; then
         echo "and rebasing ${branch} onto master"
-        git pull --rebase > /dev/null 2>&1
+        [[ $dry_run == false ]] && git pull --rebase > /dev/null 2>&1
     fi
 fi
 

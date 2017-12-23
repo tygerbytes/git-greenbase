@@ -4,53 +4,27 @@ if [[ ${GREENBASE_DEBUG-false} != false ]]; then
     set -x
 fi
 
-# Get real path to script
-scriptpath="$(readlink -f "$0")"
-scriptdir="${scriptpath%/*}"
-
-get_config() {
-    [[ $# -ne 1 ]] && { echo "git config greenbase.???: No option specified." >&2; exit 1; }
-    key=$1
-
-    # Check git config
-    value=$(git config "greenbase.gitlab.$key")
-    if [[ ! -z $value ]]; then
-        echo $value
-        return 0
-    fi
-
-    echo "git config greenbase.\'$key\' is not configured." >&4
-    exit 1
-}
+# -- Assumptions
+#  $scriptdir is ..\
+#  $branch has been set by the caller
+#  $provider has been set by the caller
+#  $git is executable
+#  $curl is executable
+#  $jq is executable
+#  get_config is a function exported by the caller
 
 apiVersion=v4
-branch=master
-token=$(get_config "token")
-projectId=$(get_config "projectId")
-serverUri=$(get_config "serverUri")
+token=$(get_config "${provider}.token")
+projectId=$(get_config "${provider}.projectId")
+serverUri=$(get_config "${provider}.serverUri")
 
-# Make sure curl exists
-if ! type curl > /dev/null 2>&1; then
-    echo "curl is not installed." >&2
-    exit 1
-fi
-
-# Use 32 or 64 bit jq?
-arch=$(uname -i)
-jq="$scriptdir/../jq/jq"
-if [[ $arch =~ 'x86_64' ]]; then
-    jq="${jq}64"
-else
-    jq="${jq}32"
-fi
-
-request_gl_project_response() {
+request_gitlab_project_response() {
     [[ $# -ne 1 ]] && { echo "Missing relative uri for querying Gitlab" >&2; exit 1; }
     relativeUri=$1
     curl --silent --header "PRIVATE-TOKEN: ${token}" "${serverUri}/api/${apiVersion}/projects/${projectId}/${relativeUri}"
 }
 
-response=$(request_gl_project_response "/pipelines?status=success&scope=finished&ref=${branch}")
+response=$(request_gitlab_project_response "pipelines?status=success&scope=finished&ref=${branch}")
 if [[ -z $response ]]; then
     echo "Error querying gitlab" >&2;
     exit 1
