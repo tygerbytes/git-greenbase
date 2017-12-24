@@ -52,7 +52,13 @@ get_config() {
         return 0
     fi
 
-    echo "git config: \'greenbase.${key}\' is not configured." >&2
+    cat >&2 <<END
+    Key not found: ${key}
+    Configure with:
+    
+        git config greenbase.${key} <option>
+
+END
     exit 1
 }
 export -f get_config
