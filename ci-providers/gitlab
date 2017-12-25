@@ -5,7 +5,7 @@ if [[ ${GREENBASE_DEBUG-false} != false ]]; then
 fi
 
 # -- Assumptions
-#  $scriptdir is ..\
+#  $scriptdir is ../
 #  $branch has been set by the caller
 #  $provider has been set by the caller
 #  $git is executable
