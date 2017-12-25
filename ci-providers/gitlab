@@ -13,10 +13,12 @@ fi
 #  $jq is executable
 #  get_config is a function exported by the caller
 
+set -e  # <- Exit on non-zero exit status
 apiVersion=v4
 token=$(get_config "${provider}.token")
 projectId=$(get_config "${provider}.projectId")
 serverUri=$(get_config "${provider}.serverUri")
+set +e
 
 request_gitlab_project_response() {
     [[ $# -ne 1 ]] && { echo "Missing relative uri for querying Gitlab" >&2; exit 1; }
