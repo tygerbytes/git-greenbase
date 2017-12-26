@@ -102,8 +102,7 @@ done
 #
 
 provider_exists() {
-    # TODO
-    return 0
+    [[ -e "${scriptdir}/ci-providers/$1" ]]
 }
 
 print_providers() {
@@ -136,7 +135,7 @@ END
 fi
 
 if ! provider_exists $provider; then
-    echo "Provider \'${provider}\' not supported." >&2
+    echo "Provider '${provider}' not supported." >&2
     print_providers
     exit 1
 fi
