@@ -23,7 +23,7 @@ set +e
 request_gitlab_project_response() {
     [[ $# -ne 1 ]] && { echo "Missing relative uri for querying Gitlab" >&2; exit 1; }
     relativeUri=$1
-    curl --silent --header "PRIVATE-TOKEN: ${token}" "${serverUri}/api/${apiVersion}/projects/${projectId}/${relativeUri}"
+    $curl --silent --header "PRIVATE-TOKEN: ${token}" "${serverUri}/api/${apiVersion}/projects/${projectId}/${relativeUri}"
 }
 
 response=$(request_gitlab_project_response "pipelines?status=success&scope=finished&ref=${branch}")
