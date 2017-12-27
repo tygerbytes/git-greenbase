@@ -20,6 +20,7 @@ if ! type git > /dev/null 2>&1; then
     echo "Cannot run git. Is it in your PATH?" >&2
     exit 1
 fi
+declare -x git=$(which git)
 
 # Make sure curl exists
 if ! type curl > /dev/null 2>&1; then
@@ -46,7 +47,7 @@ get_config() {
     key=$1
 
     # Check git config
-    value=$(git config "greenbase.${key}")
+    value=$($git config "greenbase.${key}")
     if [[ ! -z $value ]]; then
         echo $value
         return 0
@@ -156,21 +157,21 @@ get_green_hash() {
 }
 
 rebase_after_pull() {
-    [[ $(git config branch.autosetuprebase) -eq always ]] \
-      || [[ $(git config pull.rebase) -eq true ]]
+    [[ $($git config branch.autosetuprebase) -eq always ]] \
+      || [[ $($git config pull.rebase) -eq true ]]
 }
 
 upstream_branch() {
-    git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)
+    $git for-each-ref --format='%(upstream:short)' $($git symbolic-ref -q HEAD)
 }
 
 # Fetch the latest
-branch=$(git rev-parse --abbrev-ref HEAD)
+branch=$($git rev-parse --abbrev-ref HEAD)
 
 if [[ $branch -ne master ]]; then
-    git fetch origin master:master > /dev/null 2>&1
+    $git fetch origin master:master > /dev/null 2>&1
 else
-    git fetch > /dev/null 2>&1
+    $git fetch > /dev/null 2>&1
 fi
 
 greenhash=$(get_green_hash)
@@ -179,29 +180,29 @@ if [[ -z $greenhash ]]; then
     exit 1
 fi
 
-if ! git cat-file -e $greenhash; then
+if ! $git cat-file -e $greenhash; then
     echo "${greenhash} not found in local repository. Check your configs." >&2
     exit 1
 fi
 
-if [[ $greenhash == $(git rev-parse master) ]]; then
+if [[ $greenhash == $($git rev-parse master) ]]; then
     echo 'Already on the latest green build. Tidying up.'
 fi
 
-echo "Latest green build: $(git log -1 --oneline $greenhash)"
+echo "Latest green build: $($git log -1 --oneline $greenhash)"
 
 echo -n "Resetting master to match "
 # Update origin/master to match greenhash
-git update-ref refs/remotes/origin/master $greenhash
+$git update-ref refs/remotes/origin/master $greenhash
 
 if [[ $branch == master ]]; then
-    [[ $dry_run == false ]] && git reset --hard $greenhash
+    [[ $dry_run == false ]] && $git reset --hard $greenhash
 else
     # Update master to match greenhash
-    git update-ref refs/heads/master $greenhash
+    $git update-ref refs/heads/master $greenhash
     if rebase_after_pull && [[ ! -z upstream_branch ]]; then
         echo "and rebasing ${branch} onto master"
-        [[ $dry_run == false ]] && git pull --rebase > /dev/null 2>&1
+        [[ $dry_run == false ]] && $git pull --rebase > /dev/null 2>&1
     fi
 fi
 
