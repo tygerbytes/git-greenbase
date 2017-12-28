@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ ${GREENBASE_DEBUG-false} != false ]]; then
-    set -x
+  set -x
 fi
 
 # -- Check dependencies and export vars
@@ -17,15 +17,15 @@ declare -x scriptdir="${scriptpath%/*}"
 
 # Make sure we can run Git commands
 if ! type git > /dev/null 2>&1; then
-    echo "Cannot run git. Is it in your PATH?" >&2
-    exit 1
+  echo "Cannot run git. Is it in your PATH?" >&2
+  exit 1
 fi
 declare -x git=$(which git)
 
 # Make sure curl exists
 if ! type curl > /dev/null 2>&1; then
-    echo "curl is not installed." >&2
-    exit 1
+  echo "curl is not installed." >&2
+  exit 1
 fi
 declare -x curl=$(which curl)
 
@@ -33,9 +33,9 @@ declare -x curl=$(which curl)
 arch=$(uname -i)
 jq="$scriptdir/jq/jq"
 if [[ $arch =~ 'x86_64' ]]; then
-    jq="${jq}64"
+  jq="${jq}64"
 else
-    jq="${jq}32"
+  jq="${jq}32"
 fi
 export jq
 
@@ -43,24 +43,24 @@ declare -x branch=master
 declare -x dry_run=false
 
 get_config() {
-    [[ $# -ne 1 ]] && { echo "git config greenbase.???: No option specified." >&2; exit 1; }
-    key=$1
+  [[ $# -ne 1 ]] && { echo "git config greenbase.???: No option specified." >&2; exit 1; }
+  key=$1
 
-    # Check git config
-    value=$($git config "greenbase.${key}")
-    if [[ ! -z $value ]]; then
-        echo $value
-        return 0
-    fi
+  # Check git config
+  value=$($git config "greenbase.${key}")
+  if [[ ! -z $value ]]; then
+    echo $value
+    return 0
+  fi
 
-    cat >&2 <<END
-    Key not found: ${key}
-    Configure with:
-    
-        git config greenbase.${key} <option>
+  cat >&2 <<END
+  Key not found: ${key}
+  Configure with:
+  
+    git config greenbase.${key} <option>
 
 END
-    exit 1
+  exit 1
 }
 export -f get_config
 
@@ -70,31 +70,31 @@ export -f get_config
 #
 
 print_help() {
-    cat >&2 <<END
+  cat >&2 <<END
 usage: git greenbase [<options>] branch
-    -p <provider> Use specific CI <provider>
-    -b <branch>   Specify <branch> other than master
-    -d            (Dry Run) Don't do anything destructive
+  -p <provider> Use specific CI <provider>
+  -b <branch>   Specify <branch> other than master
+  -d      (Dry Run) Don't do anything destructive
 
 END
 }
 
 while getopts "b:dp:" opt; do
-    case $opt in
-        p)
-            provider_override="${OPTARG}"
-            ;;
-        b)
-            branch="${OPTARG}"
-            ;;
-        d)
-            dry_run=true
-            ;;
-        \?)
-            print_help
-            exit 1
-            ;;
-    esac
+  case $opt in
+    p)
+      provider_override="${OPTARG}"
+      ;;
+    b)
+      branch="${OPTARG}"
+      ;;
+    d)
+      dry_run=true
+      ;;
+    \?)
+      print_help
+      exit 1
+      ;;
+  esac
 done
 
 
@@ -103,47 +103,47 @@ done
 #
 
 provider_exists() {
-    [[ -e "${scriptdir}/ci-providers/$1" ]]
+  [[ -e "${scriptdir}/ci-providers/$1" ]]
 }
 
 print_providers() {
-    pushd ./ > /dev/null
-    d="${scriptdir}/ci-providers"
-    cd $d
-    echo -e "\ngreenbase supports the following CI providers:"
-    find "${d}" -maxdepth 1 -type f -not -name '*~' -printf " • %f\n" 
-    echo -e "\nWant more providers?\nPull requests welcome at https://github.com/tygerbytes/git-greenbase\n"
-    popd > /dev/null
+  pushd ./ > /dev/null
+  d="${scriptdir}/ci-providers"
+  cd $d
+  echo -e "\ngreenbase supports the following CI providers:"
+  find "${d}" -maxdepth 1 -type f -not -name '*~' -printf " • %f\n" 
+  echo -e "\nWant more providers?\nPull requests welcome at https://github.com/tygerbytes/git-greenbase\n"
+  popd > /dev/null
 } >&2
 
 declare -x provider
 
 if [[ ! -z $provider_override ]]; then
-    provider=$provider_override
+  provider=$provider_override
 else
-    provider=$(get_config "provider") > /dev/null 2>&1
+  provider=$(get_config "provider") > /dev/null 2>&1
 fi
 
 if [[ -z $provider ]]; then
-    cat >&2 <<END
+  cat >&2 <<END
 
-    CI provider not set.
-    Configure with:
-    
-        git config greenbase.provider <provider>
+  CI provider not set.
+  Configure with:
+  
+    git config greenbase.provider <provider>
 
-    Or:
+  Or:
 
-        git greenbase -p <provider>
+    git greenbase -p <provider>
 
 END
-    exit 1
+  exit 1
 fi
 
 if ! provider_exists $provider; then
-    echo "Provider '${provider}' not supported." >&2
-    print_providers
-    exit 1
+  echo "Provider '${provider}' not supported." >&2
+  print_providers
+  exit 1
 fi
 
 
@@ -152,41 +152,41 @@ fi
 #
 
 get_green_hash() {
-    hash="$(${scriptdir}/ci-providers/${provider})"
-    echo $hash
+  hash="$(${scriptdir}/ci-providers/${provider})"
+  echo $hash
 }
 
 rebase_after_pull() {
-    [[ $($git config branch.autosetuprebase) -eq always ]] \
-      || [[ $($git config pull.rebase) -eq true ]]
+  [[ $($git config branch.autosetuprebase) -eq always ]] \
+    || [[ $($git config pull.rebase) -eq true ]]
 }
 
 upstream_branch() {
-    $git for-each-ref --format='%(upstream:short)' $($git symbolic-ref -q HEAD)
+  $git for-each-ref --format='%(upstream:short)' $($git symbolic-ref -q HEAD)
 }
 
 # Fetch the latest
 branch=$($git rev-parse --abbrev-ref HEAD)
 
 if [[ $branch -ne master ]]; then
-    $git fetch origin master:master > /dev/null 2>&1
+  $git fetch origin master:master > /dev/null 2>&1
 else
-    $git fetch > /dev/null 2>&1
+  $git fetch > /dev/null 2>&1
 fi
 
 greenhash=$(get_green_hash)
 if [[ -z $greenhash ]]; then
-    echo "Unable to retrieve latest green build." >&2
-    exit 1
+  echo "Unable to retrieve latest green build." >&2
+  exit 1
 fi
 
 if ! $git cat-file -e $greenhash; then
-    echo "${greenhash} not found in local repository. Check your configs." >&2
-    exit 1
+  echo "${greenhash} not found in local repository. Check your configs." >&2
+  exit 1
 fi
 
 if [[ $greenhash == $($git rev-parse master) ]]; then
-    echo 'Already on the latest green build. Tidying up.'
+  echo 'Already on the latest green build. Tidying up.'
 fi
 
 echo "Latest green build: $($git log -1 --oneline $greenhash)"
@@ -196,13 +196,13 @@ echo -n "Resetting master to match "
 $git update-ref refs/remotes/origin/master $greenhash
 
 if [[ $branch == master ]]; then
-    [[ $dry_run == false ]] && $git reset --hard $greenhash
+  [[ $dry_run == false ]] && $git reset --hard $greenhash
 else
-    # Update master to match greenhash
-    $git update-ref refs/heads/master $greenhash
-    if rebase_after_pull && [[ ! -z upstream_branch ]]; then
-        echo "and rebasing ${branch} onto master"
-        [[ $dry_run == false ]] && $git pull --rebase > /dev/null 2>&1
-    fi
+  # Update master to match greenhash
+  $git update-ref refs/heads/master $greenhash
+  if rebase_after_pull && [[ ! -z upstream_branch ]]; then
+    echo "and rebasing ${branch} onto master"
+    [[ $dry_run == false ]] && $git pull --rebase > /dev/null 2>&1
+  fi
 fi
 
