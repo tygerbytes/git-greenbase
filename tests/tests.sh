@@ -4,6 +4,8 @@
 # /
 #
 
+root_dir=..
+
 # Fake get_config
 get_config() {
   case $1 in
@@ -33,11 +35,11 @@ setup() {
   export -f curl_fake
   export curl=curl_fake
 
-  export jq=jq/jq64
+  export jq=${root_dir}/jq/jq64
 }
 
 @test "test bats" {
-  hash=$(./ci-providers/gitlab)
+  hash=$(${root_dir}/ci-providers/gitlab)
   [[ $hash == "this_is_a_hash" ]]
 }
 
