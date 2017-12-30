@@ -4,44 +4,13 @@ if [[ ${GREENBASE_DEBUG-false} != false ]]; then
   set -x
 fi
 
-source ./greenbase.resolve_deps
-source ./greenbase.config
-
+# Defaults
 declare -x branch=master
 declare -x dry_run=false
 
-# -- Parse options && Display help
-# /
-#
-
-print_help() {
-  cat >&2 <<END
-usage: git greenbase [<options>] branch
-  -p <provider> Use specific CI <provider>
-  -b <branch>   Specify <branch> other than master
-  -d      (Dry Run) Don't do anything destructive
-
-END
-}
-
-while getopts "b:dp:" opt; do
-  case $opt in
-    p)
-      provider_override="${OPTARG}"
-      ;;
-    b)
-      branch="${OPTARG}"
-      ;;
-    d)
-      dry_run=true
-      ;;
-    \?)
-      print_help
-      exit 1
-      ;;
-  esac
-done
-
+source ./greenbase.resolve_deps
+source ./greenbase.config
+source ./greenbase.opts
 
 # -- Set provider
 # /
