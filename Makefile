@@ -1,7 +1,7 @@
 
 test: clone_bats
 	@echo "Running tests"
-	@cd tests; ./tests.sh; cd ..
+	@cd tests; ./run_tests; cd ..
 	@echo Done!
 .PHONY: test
 
