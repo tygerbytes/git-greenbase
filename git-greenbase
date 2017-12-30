@@ -4,33 +4,11 @@ if [[ ${GREENBASE_DEBUG-false} != false ]]; then
   set -x
 fi
 
-source ./resolve_deps
+source ./greenbase.resolve_deps
+source ./greenbase.config
 
 declare -x branch=master
 declare -x dry_run=false
-
-get_config() {
-  [[ $# -ne 1 ]] && { echo "git config greenbase.???: No option specified." >&2; exit 1; }
-  key=$1
-
-  # Check git config
-  value=$($git config "greenbase.${key}")
-  if [[ ! -z $value ]]; then
-    echo $value
-    return 0
-  fi
-
-  cat >&2 <<END
-  Key not found: ${key}
-  Configure with:
-  
-    git config greenbase.${key} <option>
-
-END
-  exit 1
-}
-export -f get_config
-
 
 # -- Parse options && Display help
 # /
