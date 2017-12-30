@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# Determine CI provider and export as $provider
+#  May be set via:
+#   - `git config greenbase.provider <provider>` 
+#   - `git greenbase -p <provider>`
+#   (-p overrides the provider set in git config)
+#
+
+provider_exists() {
+  [[ -e "${scriptdir}/ci-providers/$1" ]]
+}
+
+print_providers() {
+  pushd ./ > /dev/null
+  d="${scriptdir}/ci-providers"
+  cd $d
+  echo -e "\ngreenbase supports the following CI providers:"
+  find "${d}" -maxdepth 1 -type f -not -name '*~' -printf " • %f\n" 
+  echo -e "\nWant more providers?\nPull requests welcome at https://github.com/tygerbytes/git-greenbase\n"
+  popd > /dev/null
+} >&2
+
+declare -x provider
+
+if [[ ! -z $provider_override ]]; then
+  provider=$provider_override
+else
+  provider=$(get_config "provider") > /dev/null 2>&1
+fi
+
+if [[ -z $provider ]]; then
+  cat >&2 <<END
+
+  CI provider not set.
+  Configure with:
+  
+    git config greenbase.provider <provider>
+
+  Or:
+
+    git greenbase -p <provider>
+
+END
+  exit 1
+fi
+
+if ! provider_exists $provider; then
+  echo "Provider '${provider}' not supported." >&2
+  print_providers
+  exit 1
+fi
