@@ -1,0 +1,13 @@
+#!/bin/bash
+
+scriptpath="$(readlink -f "$0")"
+scriptdir="${scriptpath%/*}"
+
+if [[ -e "${scriptdir}/bats" ]]; then
+  # bats already installed
+  exit 0
+fi
+
+git clone https://github.com/sstephenson/bats.git "${scriptdir}/bats"
+exit 0
+
