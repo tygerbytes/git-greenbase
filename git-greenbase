@@ -4,15 +4,32 @@ if [[ ${GREENBASE_DEBUG-false} != false ]]; then
   set -x
 fi
 
+set -e
+
 # Defaults
-declare -x branch=master
-declare -x dry_run=false
+export branch=master
+export dry_run=false
+
+inject() {
+  # Source the script referenced by the variable name matching $1.
+  #  If no matching variable is found, source the file matching $1.
+  # When searching for a variable matching $1, '.' will be replaced with '_'
+  [[ $# -ne 1 ]] && { echo "Nothing to inject." >&2; exit 1; }
+  var=$( echo $1 | tr '\.' '_' )
+  injected_file="${!var}"
+  if [[ ! -z $injected_file ]]; then
+    echo Injecting $injected_file
+    source "${injected_file}"
+  else
+    source "./${1}"
+  fi
+}
 
 # Source helper scripts
-source ./greenbase.resolve_deps
-source ./greenbase.config
-source ./greenbase.opts
-source ./greenbase.provider
+inject 'greenbase.resolve_deps'
+inject 'greenbase.config'
+inject 'greenbase.opts'
+inject 'greenbase.provider'
 
 get_green_hash() {
   hash="$(${scriptdir}/ci-providers/${provider})"

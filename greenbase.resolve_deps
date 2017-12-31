@@ -6,7 +6,7 @@
 
 # Get true path/dir to script
 scriptpath="$(readlink -f "$0")"
-declare -x scriptdir="${scriptpath%/*}"
+export scriptdir="${scriptpath%/*}"
 
 # Make sure we are in a Git repo
 [[ ! -e .git ]] && { echo "Not a git repo"; exit 1; } >&2
@@ -16,14 +16,14 @@ if ! type git > /dev/null 2>&1; then
   echo "Cannot run git. Is it in your PATH?" >&2
   exit 1
 fi
-declare -x git=$(which git)
+export git=$(which git)
 
 # Make sure curl exists
 if ! type curl > /dev/null 2>&1; then
   echo "curl is not installed." >&2
   exit 1
 fi
-declare -x curl=$(which curl)
+export curl=$(which curl)
 
 # Use 32 or 64 bit jq?
 arch=$(uname -i)

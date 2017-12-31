@@ -21,13 +21,14 @@ print_providers() {
   popd > /dev/null
 } >&2
 
-declare -x provider
+provider=none
 
 if [[ ! -z $provider_override ]]; then
   provider=$provider_override
 else
   provider=$(get_config "provider") > /dev/null 2>&1
 fi
+export provider
 
 if [[ -z $provider ]]; then
   cat >&2 <<END
