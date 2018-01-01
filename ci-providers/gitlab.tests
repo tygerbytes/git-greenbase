@@ -1,10 +1,8 @@
-#!./bats/bin/bats
+#!/usr/bin/env bats
 
 # -- Gitlab provider tests
 # /
 #
-
-root_dir=..
 
 # Fake get_config
 get_config() {
@@ -38,8 +36,9 @@ setup() {
   export jq=${root_dir}/jq/jq64
 }
 
-@test "test bats" {
-  hash=$(${root_dir}/ci-providers/gitlab)
+@test "gitlab provider: parses gitlab json and returns hash" {
+  hash=$($BATS_TEST_DIRNAME/gitlab)
+  echo $hash
   [[ $hash == "this_is_a_hash" ]]
 }
 

@@ -1,17 +1,19 @@
+SHELL := /bin/bash
 
 test: clone_bats
 	@echo "Running tests"
-	@cd tests; ./run_tests; cd ..
+	@./run_tests
 	@echo Done!
 .PHONY: test
 
 clone_bats:
-	./tests/clone_bats
+	@echo "Ensure bats exists"
+	@./lib/clone_bats
 
 clean:
 	@echo "Cleaning up"
 	@echo "Remove bats repo"
-	rm -rf tests/bats
+	rm -rf lib/bats
 	@echo "Remove ignored files"
 	git clean -fXd
 	@echo Done!

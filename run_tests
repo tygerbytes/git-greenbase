@@ -1,0 +1,4 @@
+#!/bin/bash
+
+find . -type f -name '*.tests' -exec ./lib/bats/bin/bats {} '+'
+

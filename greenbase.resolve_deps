@@ -27,7 +27,7 @@ export curl=$(which curl)
 
 # Use 32 or 64 bit jq?
 arch=$(uname -i)
-jq="$scriptdir/jq/jq"
+jq="$scriptdir/lib/jq/jq"
 if [[ $arch =~ 'x86_64' ]]; then
   jq="${jq}64"
 else

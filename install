@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Set appropriate file permissions
-chmod -R 775 ./
-chmod 664 ./jq/LICENSE
+chmod -R 664 ./
+chmod 775 git-greenbase install run_tests
 
 # Add symbolic link to path
 sudo ln -fs "$(pwd)/git-greenbase" /usr/local/bin/git-greenbase
