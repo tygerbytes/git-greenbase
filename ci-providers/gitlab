@@ -7,7 +7,6 @@ fi
 # -- Assumptions
 #  $branch has been set by the caller
 #  $provider has been set by the caller
-#  $git is executable
 #  $curl is executable
 #  $jq is executable
 #  get_config is a function exported by the caller

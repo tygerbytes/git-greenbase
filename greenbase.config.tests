@@ -2,11 +2,22 @@
 
 source './greenbase.config'
 
+@test "config: returns selected git config option for greenbase" {
+  $git config greenbase.testvalue green
+  run get_config "testvalue"
+  git config --unset greenbase.testvalue
+  [[ ${status} -eq 0 ]]
+  [[ ${output} == 'green' ]]
+}
+
 @test "config: invoking get_config with no arguments prints an error" {
-  echo "git: $git"
-  
   run get_config
-  [[ ${status} -eq 1 ]]
+  [[ ${status} -ne 0 ]]
   [[ ${output} =~ 'No option specified' ]]
 }
 
+@test "config: invoking get_config with invalid key prints error and a helpful hint" {
+  run get_config boogabooga
+  [[ ${status} -ne 0 ]]
+  [[ ${output} =~ 'Key not found' ]]
+}
