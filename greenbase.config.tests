@@ -1,12 +1,12 @@
 #!/usr/bin/env bats
 
-setup() {
-  load greenbase.config
-}
+source './greenbase.config'
 
 @test "invoking get_config with no arguments prints an error" {
+  echo "git: $git"
+  
   run get_config
-  [[ "$status" -eq 1 ]]
-  [[ $output =~ 'No option specified' ]]
+  [[ ${status} -eq 1 ]]
+  [[ ${output} =~ 'No option specified' ]]
 }
 

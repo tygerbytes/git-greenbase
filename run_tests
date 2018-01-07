@@ -1,4 +1,7 @@
 #!/bin/bash
 
+source './greenbase.prep_environment'
+source './greenbase.resolve_deps'
+
 find . -type f -name '*.tests' -exec ./lib/bats/bin/bats {} '+'
 

@@ -26,14 +26,11 @@ curl_fake() {
 }
 
 setup() {
-  export branch=master
-
+  # Fake get_config
   export -f get_config
-
-  export -f curl_fake
+  # Fake curl
+  export -f curl_fake; 
   export curl=curl_fake
-
-  export jq=${root_dir}/jq/jq64
 }
 
 @test "gitlab provider: parses gitlab json and returns hash" {

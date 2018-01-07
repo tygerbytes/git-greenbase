@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# Get true path/dir to script
+scriptpath="$(readlink -f "$0")"
+export BASE_DIR="${scriptpath%/*}"
+export LIB_DIR="${BASE_DIR}/lib"
+

@@ -4,9 +4,8 @@
 # /
 #
 
-# Get true path/dir to script
-scriptpath="$(readlink -f "$0")"
-export scriptdir="${scriptpath%/*}"
+# TODO: Replace scriptdir with BASE_DIR
+export scriptdir=$BASE_DIR
 
 # Make sure we are in a Git repo
 [[ ! -e .git ]] && { echo "Not a git repo"; exit 1; } >&2
@@ -27,11 +26,10 @@ export curl=$(which curl)
 
 # Use 32 or 64 bit jq?
 arch=$(uname -i)
-jq="$scriptdir/lib/jq/jq"
+jq="${LIB_DIR}/jq/jq"
 if [[ $arch =~ 'x86_64' ]]; then
   jq="${jq}64"
 else
   jq="${jq}32"
 fi
 export jq
-

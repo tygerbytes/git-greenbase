@@ -26,6 +26,7 @@ inject() {
 }
 
 # Source helper scripts
+inject 'greenbase.prep_environment'
 inject 'greenbase.resolve_deps'
 inject 'greenbase.config'
 inject 'greenbase.opts'
