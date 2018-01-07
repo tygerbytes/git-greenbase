@@ -4,9 +4,6 @@
 # /
 #
 
-# TODO: Replace scriptdir with BASE_DIR
-export scriptdir=$BASE_DIR
-
 # Make sure we are in a Git repo
 [[ ! -e .git ]] && { echo "Not a git repo"; exit 1; } >&2
 

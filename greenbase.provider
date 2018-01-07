@@ -8,12 +8,12 @@
 #
 
 provider_exists() {
-  [[ -e "${scriptdir}/ci-providers/$1" ]]
+  [[ -e "${BASE_DIR}/ci-providers/$1" ]]
 }
 
 print_providers() {
   pushd ./ > /dev/null
-  d="${scriptdir}/ci-providers"
+  d="${BASE_DIR}/ci-providers"
   cd $d
   echo -e "\ngreenbase supports the following CI providers:"
   find "${d}" -maxdepth 1 -type f -not \( -name '*~' -or -name '*.tests' \) -printf " • %f\n" 

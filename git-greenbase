@@ -33,7 +33,7 @@ inject 'greenbase.opts'
 inject 'greenbase.provider'
 
 get_green_hash() {
-  hash="$(${scriptdir}/ci-providers/${provider})"
+  hash="$(${BASE_DIR}/ci-providers/${provider})"
   echo $hash
 }
 
