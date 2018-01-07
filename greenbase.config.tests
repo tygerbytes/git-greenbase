@@ -2,7 +2,7 @@
 
 source './greenbase.config'
 
-@test "invoking get_config with no arguments prints an error" {
+@test "config: invoking get_config with no arguments prints an error" {
   echo "git: $git"
   
   run get_config

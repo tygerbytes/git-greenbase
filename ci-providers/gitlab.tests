@@ -22,20 +22,39 @@ get_config() {
 }
 
 curl_fake() {
-  echo '[{"id":12345,"sha":"this_is_a_hash","ref":"master","status":"success"}]'
+  echo "$curl_fake_response"
+}
+
+mock_curl_response() {
+  export -f curl_fake
+  export curl=curl_fake
+  export curl_fake_response=$1
 }
 
 setup() {
   # Fake get_config
   export -f get_config
-  # Fake curl
-  export -f curl_fake; 
-  export curl=curl_fake
 }
 
 @test "gitlab provider: parses gitlab json and returns hash" {
+  mock_curl_response '[{"id":12345,"sha":"this_is_a_hash","ref":"master","status":"success"}]'
+
   hash=$($BATS_TEST_DIRNAME/gitlab)
   echo $hash
   [[ $hash == "this_is_a_hash" ]]
 }
 
+@test "gitlab provider: fails with error if server unavailable" {
+  run $BATS_TEST_DIRNAME/gitlab
+  [[ ${status} -ne 0 ]]
+  [[ ${output} =~ 'Error querying' ]]
+}
+
+@test "gitlab provider: fails if unable to parse reponse" {
+  mock_curl_response 'blah:blah' 
+
+  run $BATS_TEST_DIRNAME/gitlab
+  echo $output
+  [[ ${status} -ne 0 ]]
+  [[ ${output} =~ 'Error parsing results' ]]
+}

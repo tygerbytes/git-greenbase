@@ -32,7 +32,7 @@ if [[ -z $response ]]; then
 fi
 
 hash=$(echo $response | $jq --raw-output '.[0].sha')
-if [[ $hash == null ]]; then
+if [[ -z $hash ]]; then
   echo "Error parsing results" >&2;
   exit 1
 fi
