@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-mock_get_config() {
+mock_get_config_response() {
 
   get_config() { echo $get_config_mocked_response; }
 
@@ -15,7 +15,7 @@ mock_get_config() {
 }
 
 @test "provider: lists supported providers if desired provider not supported" {
-  mock_get_config "nothing"
+  mock_get_config_response "nothing"
   run source './greenbase.provider'
   [[ ${status} -ne 0 ]]
   [[ ${output} =~ "Provider 'nothing' not supported" ]]
@@ -23,7 +23,7 @@ mock_get_config() {
 }
 
 @test "provider: shows how to set provider if none is set" {
-  mock_get_config ""
+  mock_get_config_response ""
   run source './greenbase.provider'
   [[ ${status} -ne 0 ]]
   [[ ${output} =~ CI\ provider\ not\ set.*Configure\ with: ]]
