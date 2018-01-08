@@ -21,11 +21,10 @@ get_config() {
   esac
 }
 
-curl_fake() {
-  echo "$curl_fake_response"
-}
-
 mock_curl_response() {
+
+  curl_fake() { echo "$curl_fake_response"; }
+
   export -f curl_fake
   export curl=curl_fake
   export curl_fake_response=$1

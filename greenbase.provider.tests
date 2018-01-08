@@ -1,0 +1,30 @@
+#!/usr/bin/env bats
+
+mock_get_config() {
+
+  get_config() { echo $get_config_mocked_response; }
+
+  export -f get_config
+  export get_config_mocked_response="${1}"
+}
+
+@test "provider: uses \$provider_override as provider if defined" {
+  export provider_override=latest
+  source './greenbase.provider'
+  [[ $provider == 'latest' ]]
+}
+
+@test "provider: lists supported providers if desired provider not supported" {
+  mock_get_config "nothing"
+  run source './greenbase.provider'
+  [[ ${status} -ne 0 ]]
+  [[ ${output} =~ "Provider 'nothing' not supported" ]]
+  [[ ${output} =~ supports\ the\ following.*gitlab ]]
+}
+
+@test "provider: shows how to set provider if none is set" {
+  mock_get_config ""
+  run source './greenbase.provider'
+  [[ ${status} -ne 0 ]]
+  [[ ${output} =~ CI\ provider\ not\ set.*Configure\ with: ]]
+}
