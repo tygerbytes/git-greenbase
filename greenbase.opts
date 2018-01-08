@@ -38,3 +38,7 @@ END
 }
 export -f parse_opts
 
+if [[ $injecting == true ]]; then
+  parse_opts $*
+fi
+

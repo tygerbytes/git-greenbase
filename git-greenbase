@@ -15,14 +15,20 @@ inject() {
   # Source the script referenced by the variable name matching $1.
   #  If no matching variable is found, source the file matching $1.
   # When searching for a variable matching $1, '.' will be replaced with '_'
-  [[ $# -ne 1 ]] && { echo "Nothing to inject." >&2; exit 1; }
+  [[ $# -lt 1 ]] && { echo "Nothing to inject." >&2; exit 1; }
+  default_script="${1}"
+
   var=$( echo $1 | tr '\.' '_' )
-  injected_file="${!var}"
-  if [[ ! -z $injected_file ]]; then
-    echo Injecting $injected_file
-    source "${injected_file}"
+  injected_script="${!var}"
+
+  injecting=true
+  shift; inject_opts="${*}"
+
+  if [[ ! -z $injected_script ]]; then
+    echo Injecting $injected_script
+    source "${injected_script}"
   else
-    source "./${1}"
+    source "./${default_script}"
   fi
 }
 
@@ -30,8 +36,7 @@ inject() {
 inject 'greenbase.prep_environment'
 inject 'greenbase.resolve_deps'
 inject 'greenbase.config'
-inject 'greenbase.opts'
-parse_opts $*
+inject 'greenbase.opts' "${*}"
 inject 'greenbase.provider'
 
 get_green_hash() {
