@@ -3,5 +3,5 @@
 source './greenbase.prep_environment'
 source './greenbase.resolve_deps'
 
-find . -type f -name '*.tests' -exec ./lib/bats/bin/bats {} '+'
+find . -type f -name '*.tests' -and -name "*$1*" -exec ./lib/bats/bin/bats {} '+'
 
