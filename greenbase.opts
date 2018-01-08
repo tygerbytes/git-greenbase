@@ -4,31 +4,37 @@
 # /
 #
 
-print_help() {
-  cat >&2 <<END
-usage: git greenbase [<options>] branch
-  -p <provider> Use specific CI <provider>
-  -b <branch>   Specify <branch> other than master
-  -d      (Dry Run) Don't do anything destructive
+parse_opts() {
+
+  print_help() {
+    cat >&2 <<END
+    usage: git greenbase [<options>] branch
+      -p <provider> Use specific CI <provider>
+      -b <branch>   Specify <branch> other than master
+      -d      (Dry Run) Don't do anything destructive
 
 END
-}
+  }
 
-while getopts "b:dp:" opt; do
-  case $opt in
-    p)
-      provider_override="${OPTARG}"
-      ;;
-    b)
-      branch="${OPTARG}"
-      ;;
-    d)
-      dry_run=true
-      ;;
-    \?)
-      print_help
-      exit 1
-      ;;
-  esac
-done
+  local OPTIND opt 
+  while getopts "b:dp:" opt; do
+    case $opt in
+      p)
+        provider_override="${OPTARG}"
+        ;;
+      b)
+        branch="${OPTARG}"
+        ;;
+      d)
+        dry_run=true
+        echo "Dry run: on"
+        ;;
+      *)
+        print_help
+        return 1
+        ;;
+    esac
+  done
+}
+export -f parse_opts
 

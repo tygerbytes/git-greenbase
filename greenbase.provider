@@ -23,7 +23,8 @@ print_providers() {
 
 provider=none
 
-if [[ ! -z $provider_override ]]; then
+if [[ ! -z $provider_override && $provider_override != 'none' ]]; then
+  echo "CI provider: ${provider_override}"
   provider=$provider_override
 else
   provider=$(get_config "provider") > /dev/null 2>&1

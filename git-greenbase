@@ -9,6 +9,7 @@ set -e
 # Defaults
 export branch=master
 export dry_run=false
+export provider_override=none
 
 inject() {
   # Source the script referenced by the variable name matching $1.
@@ -30,6 +31,7 @@ inject 'greenbase.prep_environment'
 inject 'greenbase.resolve_deps'
 inject 'greenbase.config'
 inject 'greenbase.opts'
+parse_opts $*
 inject 'greenbase.provider'
 
 get_green_hash() {

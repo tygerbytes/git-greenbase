@@ -1,0 +1,27 @@
+#!/usr/bin/env bats
+
+source './greenbase.opts'
+
+@test "opts: print usage to stderr for unknown options" {
+  run parse_opts -h 2>&1
+  [[ ${status} -ne 0 ]]
+  [[ ${output} =~ 'usage: git greenbase' ]]
+}
+
+@test "opts: -p overrides the provider set via git config" {
+  export provider_override=banana
+  parse_opts -p orange
+  [[ $provider_override == 'orange' ]]
+}
+
+@test "opts: -b overrides the default branch to operate on" {
+  export branch=master
+  parse_opts -b leafy
+  [[ $branch == 'leafy' ]]
+}
+
+@test "opts: -d enables 'dry run' mode" {
+  export dry_run=false
+  parse_opts -d
+  [[ $dry_run == 'true' ]]
+}
