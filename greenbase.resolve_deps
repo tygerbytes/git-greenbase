@@ -21,12 +21,23 @@ if ! type curl > /dev/null 2>&1; then
 fi
 export curl=$(which curl)
 
+get_os_arch() {
+  arch=$(getconf LONG_BIT)
+  jq="${LIB_DIR}/jq/jq"
+  if [[ $arch -eq 64 ]]; then
+    echo 64
+  elif [[ $arch -eq 32 ]]; then
+    echo 32
+  elif [[ ! $( "${jq}64" --version 2>&1 ) =~ error ]]; then
+    echo 64
+  elif [[ ! $( "${jq}32" --version 2>&1 ) =~ error ]]; then
+    echo 32
+  else
+    echo "Unable to determine OS architecture. Defaulting to x86_64" >&2
+    echo 64
+  fi
+}
+
 # Use 32 or 64 bit jq?
-arch=$(uname -i)
-jq="${LIB_DIR}/jq/jq"
-if [[ $arch =~ 'x86_64' ]]; then
-  jq="${jq}64"
-else
-  jq="${jq}32"
-fi
+jq="${LIB_DIR}/jq/jq$(get_os_arch)"
 export jq
