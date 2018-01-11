@@ -68,6 +68,12 @@ if [[ -z $greenhash ]]; then
   exit 1
 fi
 
+if [[ ! $greenhash =~ ^[0-9A-Fa-f]+$ ]]; then
+  echo "Unable to retrieve latest green build."
+  echo -e "Not a valid commit SHA:\n${greenhash}"
+  exit 1
+fi >&2
+
 if ! $git cat-file -e $greenhash; then
   echo "${greenhash} not found in local repository. Check your configs." >&2
   exit 1

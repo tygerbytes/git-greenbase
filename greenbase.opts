@@ -27,7 +27,7 @@ END
         ;;
       d)
         dry_run=true
-        echo "Dry run: on"
+        echo "Dry run: on" >&2
         ;;
       *)
         print_help
