@@ -1,0 +1,35 @@
+#!/bin/bash
+
+if [[ ${GREENBASE_DEBUG-false} != false ]]; then
+  set -x
+fi
+
+# -- Assumptions
+# TODO: 
+#
+#
+
+set -e  # <- Exit on non-zero exit status
+apiVersion=3
+token=$(get_config "${provider}.token")
+repoId=$(get_config "${provider}.repoId")
+serverUri=$(get_config "${provider}.serverUri")
+set +e
+
+request_travisci_response() {
+  [[ $# -ne 1 ]] && { echo "Missing relative uri for querying Travis CI" >&2; exit 1; }
+  relativeUri=$1
+
+  $curl --silent \
+    --header "Travis-API-Version: ${apiVersion}" \
+    --header "User-Agent: git-greenbase" \
+    --header "Authorization: token ${token}" \
+    "${serverUri}/${relativeUri}"
+}
+
+request_travisci_response "repo/$repoId/builds?branch.name=master&limit=1&build.state=passed"
+#TODO: parse response and extract sha
+
+exit 1
+# TODO: exit with 0 when we're finished
+
