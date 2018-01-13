@@ -19,7 +19,7 @@ serverUri=$(get_config "${provider}.serverUri")
 set +e
 
 request_gitlab_project_response() {
-  [[ $# -ne 1 ]] && { echo "Missing relative uri for querying Gitlab" >&2; exit 1; }
+  [[ $# -ne 1 ]] && { fail "Missing relative uri for querying Gitlab"; }
   relativeUri=$1
   $curl --silent \
     --header "PRIVATE-TOKEN: ${token}" \
@@ -29,14 +29,12 @@ request_gitlab_project_response() {
 
 response=$(request_gitlab_project_response "pipelines?status=success&scope=finished&ref=${branch}")
 if [[ -z $response ]]; then
-  echo "Error querying gitlab" >&2;
-  exit 1
+  fail "Error querying gitlab"
 fi
 
 hash=$(echo $response | $jq --raw-output '.[0].sha')
 if [[ -z $hash ]]; then
-  echo "Error parsing results" >&2;
-  exit 1
+  fail "Error parsing results"
 fi
 
 echo $hash

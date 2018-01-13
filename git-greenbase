@@ -15,7 +15,7 @@ inject() {
   # Source the script referenced by the variable name matching $1.
   #  If no matching variable is found, source the file matching $1.
   # When searching for a variable matching $1, '.' will be replaced with '_'
-  [[ $# -lt 1 ]] && { echo "Nothing to inject." >&2; exit 1; }
+  [[ $# -lt 1 ]] && { fail "Nothing to inject."; }
   default_script="${1}"
 
   var=$( echo $1 | tr '\.' '_' )
@@ -64,19 +64,15 @@ fi
 
 greenhash=$(get_green_hash)
 if [[ -z $greenhash ]]; then
-  echo "Unable to retrieve latest green build." >&2
-  exit 1
+  fail "Unable to retrieve latest green build."
 fi
 
 if [[ ! $greenhash =~ ^[0-9A-Fa-f]+$ ]]; then
-  echo "Unable to retrieve latest green build."
-  echo -e "Not a valid commit SHA:\n${greenhash}"
-  exit 1
+  fail "Unable to retrieve latest green build.\nNot a valid commit SHA:\n${greenhash}"
 fi >&2
 
 if ! $git cat-file -e $greenhash; then
-  echo "${greenhash} not found in local repository. Check your configs." >&2
-  exit 1
+  fail "${greenhash} not found in local repository. Check your configs."
 fi
 
 if [[ $greenhash == $($git rev-parse master) ]]; then

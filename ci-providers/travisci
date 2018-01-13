@@ -19,7 +19,7 @@ serverUri=$(get_config "${provider}.serverUri")
 set +e
 
 request_travisci_response() {
-  [[ $# -ne 1 ]] && { echo "Missing relative uri for querying Travis CI" >&2; exit 1; }
+  [[ $# -ne 1 ]] && { fail "Missing relative uri for querying Travis CI"; }
   relativeUri=$1
 
   $curl --silent \
@@ -31,14 +31,12 @@ request_travisci_response() {
 
 response=$(request_travisci_response "repo/$repoId/builds?branch.name=${branch}&limit=1&build.state=passed")
 if [[ -z $response ]]; then
-  echo "Error querying Travis CI" >&2;
-  exit 1
+  fail "Error querying Travis CI"
 fi
 
 hash=$(echo $response | $jq --raw-output '.builds[0].commit.sha')
 if [[ -z $hash ]]; then
-  echo "Error parsing results" >&2;
-  exit 1
+  fail "Error parsing results"
 fi
 
 echo $hash

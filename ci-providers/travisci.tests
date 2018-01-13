@@ -58,3 +58,4 @@ setup() {
   [[ ${status} -ne 0 ]]
   [[ ${output} =~ 'Error parsing results' ]]
 }
+

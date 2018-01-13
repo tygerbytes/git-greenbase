@@ -4,20 +4,24 @@
 # /
 #
 
+fail() {
+  echo -e "${1}"
+  exit 1
+} >&2
+export -f fail
+
 # Make sure we are in a Git repo
-[[ ! -e .git ]] && { echo "Not a git repo"; exit 1; } >&2
+[[ ! -e .git ]] && { fail "Not a git repo"; }
 
 # Make sure we can run Git commands
 if ! type git > /dev/null 2>&1; then
-  echo "Cannot run git. Is it in your PATH?" >&2
-  exit 1
+  fail "Cannot run git. Is it in your PATH?"
 fi
 export git=$(which git)
 
 # Make sure curl exists
 if ! type curl > /dev/null 2>&1; then
-  echo "curl is not installed." >&2
-  exit 1
+  fail "curl is not installed."
 fi
 export curl=$(which curl)
 
@@ -41,3 +45,4 @@ get_os_arch() {
 # Use 32 or 64 bit jq?
 jq="${LIB_DIR}/jq/jq$(get_os_arch)"
 export jq
+
