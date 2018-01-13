@@ -34,24 +34,24 @@ A provider if set and configured via `git config greenbase.`
 
 (I have plans to simplify this process...)
 
-### Latest
+#### `Latest`
     git config greenbase.provider latest
     
 `Latest` is a psuedo CI provider. It just returns the latest commit from `origin/master`, passing build or not. Typically used with the `-p` switch: `git greenbase -p latest`.
 
-#### GitLab
+#### `GitLab`
     git config greenbase.provider gitlab
     git config greenbase.gitlab.token <TOKEN>
     git config greenbase.gitlab.serverUri <SERVER URI>
     git config greenbase.gitlab.projectId <PROJECT ID>
 
-### Travis CI
+#### `Travis CI`
     git config greenbase.provider travisci
     git config greenbase.travisci.token <TOKEN>
     git config greenbase.travisci.serverUri <SERVER_URI>
     git config greenbase.travisci.repoId <GITHUB_REPO_ID>
     
-### TFS
+#### `TFS`
 TFS support is currently experimental.
 
     git config greenbase.provider tfs
