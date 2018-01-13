@@ -1,0 +1,60 @@
+#!/usr/bin/env bats
+
+# -- Travis CI provider tests
+# /
+#
+
+# Fake get_config
+get_config() {
+  case $1 in
+    .token)
+      echo "some_api_token"
+      ;;
+    .repoId)
+      echo "42"
+      ;;
+    .serverUri)
+      echo "localhost"
+      ;;
+    \?)
+      echo $1
+  esac
+}
+
+mock_curl_response() {
+
+  curl_fake() { echo "$curl_fake_response"; }
+
+  export -f curl_fake
+  export curl=curl_fake
+  export curl_fake_response=$1
+}
+
+setup() {
+  # Fake get_config
+  export -f get_config
+}
+
+@test "travisci provider: parses Travis CI json and returns hash" {
+
+  mock_curl_response '{"@type":"builds","@href":"/repo/1234567/builds?branch.name=master&limit=1&build.state=passed","builds":[{"@type":"build","state":"passed","event_type":"push","previous_state":"passed","commit":{"@type":"commit","@representation":"minimal","sha":"this_is_a_hash","ref":"refs/heads/master","message":"some commit message"}}]}'
+
+  hash=$($BATS_TEST_DIRNAME/travisci)
+  echo $hash
+  [[ $hash == "this_is_a_hash" ]]
+}
+
+@test "travisci provider: fails with error if server unavailable" {
+  run $BATS_TEST_DIRNAME/travisci
+  [[ ${status} -ne 0 ]]
+  [[ ${output} =~ 'Error querying' ]]
+}
+
+@test "travisci provider: fails if unable to parse reponse" {
+  mock_curl_response 'blah:blah' 
+
+  run $BATS_TEST_DIRNAME/travisci
+  echo $output
+  [[ ${status} -ne 0 ]]
+  [[ ${output} =~ 'Error parsing results' ]]
+}

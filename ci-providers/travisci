@@ -5,9 +5,11 @@ if [[ ${GREENBASE_DEBUG-false} != false ]]; then
 fi
 
 # -- Assumptions
-# TODO: 
-#
-#
+# $branch has been set by the caller
+# $provider has been set by the caller
+# $curl is executable
+# $jq is executable
+# get_config is a function exported by the caller
 
 set -e  # <- Exit on non-zero exit status
 apiVersion=3
@@ -27,9 +29,17 @@ request_travisci_response() {
     "${serverUri}/${relativeUri}"
 }
 
-request_travisci_response "repo/$repoId/builds?branch.name=master&limit=1&build.state=passed"
-#TODO: parse response and extract sha
+response=$(request_travisci_response "repo/$repoId/builds?branch.name=${branch}&limit=1&build.state=passed")
+if [[ -z $response ]]; then
+  echo "Error querying Travis CI" >&2;
+  exit 1
+fi
 
-exit 1
-# TODO: exit with 0 when we're finished
+hash=$(echo $response | $jq --raw-output '.builds[0].commit.sha')
+if [[ -z $hash ]]; then
+  echo "Error parsing results" >&2;
+  exit 1
+fi
+
+echo $hash
 
