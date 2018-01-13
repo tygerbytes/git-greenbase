@@ -5,10 +5,15 @@
 #
 
 fail() {
-  echo -e "\033[31m${1}\033[0m"
+  echo -e "\033[1;31m!!! ${1}\033[0m"
   exit 1
 } >&2
 export -f fail
+
+warn() {
+  echo -e "\033[1;33mWarning: ${1}\033[0m"
+} >&2
+export -f warn
 
 # Make sure we are in a Git repo
 [[ ! -e .git ]] && { fail "Not a git repo"; }

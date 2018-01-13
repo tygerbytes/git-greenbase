@@ -1,0 +1,46 @@
+#!/bin/bash
+
+if [[ ${GREENBASE_DEBUG-false} != false ]]; then
+  set -x
+fi
+
+warn "greenbase support for TFS is experimental"
+
+# -- Assumptions
+# $branch has been set by the caller
+# $provider has been set by the caller
+# $curl is executable
+# $jq is executable
+# get_config is a function exported by the caller
+
+set -e  # <- Exit on non-zero exit status
+apiVersion='2.2'
+# Tip: base64 <(echo plain_token)
+tokenBase64=$(get_config "${provider}.tokenBase64")
+projectId=$(get_config "${provider}.projectId")
+serverUri=$(get_config "${provider}.serverUri")
+set +e
+
+request_tfs_response() {
+  [[ $# -ne 1 ]] && { fail "Missing relative uri for querying TFS CI"; }
+  relativeUri=$1
+
+  $curl --silent \
+    --header "User-Agent: git-greenbase" \
+    --header "Authorization: Basic :${tokenBase64}" \
+    "${serverUri}/${relativeUri}"
+}
+
+# TODO: Test this against a live TFS CI API
+response=$(request_tfs_response "${projectId}/_apis/build/builds?resultFilter=succeeded&top=2&api-version=${apiVersion}")
+if [[ -z $response ]]; then
+  fail "Error querying TFS CI"
+fi
+
+hash=$(echo $response | $jq --raw-output '.value[] | select(.sourceBranch == "refs/heads/master") | .sourceVersion')
+if [[ -z $hash ]]; then
+  fail "Error parsing results"
+fi
+
+echo $hash
+
