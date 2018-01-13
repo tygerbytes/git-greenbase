@@ -63,5 +63,8 @@ TFS support is currently experimental.
 
     base64 <(echo my_token)
 
+## Development
+See [DEVELOPMENT.md](DEVELOPMENT.md).
+
 ## License
 MIT. See [LICENSE.md](LICENSE.md).
