@@ -2,9 +2,9 @@
 `git greenbase` is an alternative to `git pull` that pulls the latest **green** build from your continuous integration (CI) provider.
 
 ## Description
-👎 **Scenario (without `greenbase`)**: You pull the latest from `origin/master` and begin adding a new feature. It doesn't build. *Huh? What did I do?* And the tests don't pass. *What..?* You spend an hour trying to figure out where you went wrong, only to discover that your code is fine -- you pulled a broken build.
+🙁 **Scenario (without `greenbase`)**: You pull the latest from `origin/master` and begin adding a new feature. It doesn't build. *Huh? What did I do?* And the tests don't pass. *What..?* You spend an hour trying to figure out where you went wrong, only to discover that your code is fine -- you pulled a broken build.
 
-👍 **Scenario (with `greenbase`)**: You pull the latest from `origin/master` using `git greenbase`. `git greenbase` queries your CI provider for the latest **passing** build, then resets your local `master` to match. You add the new feature, build, run the tests, and submit a pull request. *That was quick! :) Think I'll grab some coffee...*
+😍 **Scenario (with `greenbase`)**: You pull the latest from `origin/master` using `git greenbase`. `git greenbase` queries your CI provider for the latest **passing** build, then resets your local `master` to match. You add the new feature, build, run the tests, and submit a pull request. *That was quick! :) Think I'll grab some coffee...*
 
 If you can relate to the first scenario, `git greenbase` is for you. The idea is that you always begin development on top of a known "green" build. That way you and your team spend far less time scratching your head wondering what you broke.
 
