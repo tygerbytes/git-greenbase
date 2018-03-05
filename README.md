@@ -1,6 +1,8 @@
 # git greenbase
 `git greenbase` is an alternative to `git pull` that pulls the latest **green** build from your continuous integration (CI) provider.
 
+See the writeup on tygertec.com: [git greenbase means never pulling a broken build](https://tygertec.com/git-greenbase/)
+
 ## Description
 🙁 **Scenario (without `greenbase`)**: You pull the latest from `origin/master` and begin adding a new feature. It doesn't build. *Huh? What did I do?* And the tests don't pass. *What..?* You spend an hour trying to figure out where you went wrong, only to discover that your code is fine -- you pulled a broken build.
 
@@ -12,7 +14,12 @@ If you can relate to the first scenario, `git greenbase` is for you. The idea is
 If you are using a rebase-based workflow, and your local branch is tracking `master`, running `git greenbase` will perform exactly as described above, but it will also rebase your local branch on top of your local copy of `master`. 
 
 ### Alternatives
-Some teams never push directly to master. They instead push to a feature branch which is built, tested, and only merged with `master` if the build succeeds. `git greenbase` would be unnecessary in such a workflow.
+Some teams never push directly to master. They instead push to a feature branch which is built, tested, and only merged with `master` if the build succeeds. `git greenbase` would be unnecessary in such a workflow. (Though it's worth mentioning that `git greenbase` makes such a workflow unncessary...)
+
+### "This is *so* **cool**, thanks!"
+Glad you like it! If `git greenbase` helps you out, support development by buying me and my wife a coffee. :)
+
+[![buymeacoffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/tygerbytes)
 
 ## Installation
 ### Linux
